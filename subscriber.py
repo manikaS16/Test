@@ -1,26 +1,33 @@
 #!/usr/bin/env python3
-import rospy
+import rclpy
+from rclpy.node import Node
 from geometry_msgs.msg import Twist
 import serial
 
-class ESCController:
-    def __init__(self, port='/dev/ttyUSB0', baud=9600):
-        self.ser = serial.Serial(port, baud, timeout=1)
-        rospy.Subscriber('/etruck', Twist, self.callback)
-        rospy.loginfo("[Subscriber] ESC Controller initialized.")
+class SimpleSubscriber(Node):
+    def __init__(self):
+        super().__init__('subscriber')
+        self.ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)  # Change port if needed
+        self.subscription = self.create_subscription(
+            Twist,
+            'etruck',
+            self.listener_callback,
+            10)
+        self.get_logger().info('Subscriber started')
 
-    def callback(self, msg):
-        speed = msg.linear.x  # -1.0 to 1.0
-        angle = int(90 + speed * 45)  # Map speed to servo angle (45-135)
+    def listener_callback(self, msg):
+        speed = msg.linear.x
+        angle = int(90 + speed * 45)
         angle = max(0, min(180, angle))
-        command = f"{angle}\n"
-        self.ser.write(command.encode())
-        rospy.loginfo(f"[Subscriber] Sent angle: {angle}")
+        self.ser.write(f"{angle}\n".encode())
+        self.get_logger().info(f"Sent angle: {angle}")
 
-    def run(self):
-        rospy.spin()
+def main(args=None):
+    rclpy.init(args=args)
+    subscriber = Subscriber()
+    rclpy.spin(subscriber)
+    subscriber.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == '__main__':
-    rospy.init_node('etruck_subscriber')
-    controller = ESCController()
-    controller.run()
+    main()
