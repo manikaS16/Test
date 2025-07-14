@@ -50,9 +50,9 @@ class Publisher(Node):
             self.motor = self.motor_backward
             self.motor_forward = 0.0
         elif key == 's':
-            self.speed_forward_motor = 0.0
-            self.speed_backward_motor = 0.0
-            self.speed_motor = 0.0
+            self.motor_forward = 0.0
+            self.motor_backward = 0.0
+            self.motor = 0.0
 
         # Steering control
         elif key == 'l':
@@ -62,6 +62,8 @@ class Publisher(Node):
             self.steer_right += self.steer_step_right
             self.steer = self.steer_right
         elif key == 'c':
+            self.steer_left = 0.0
+            self.steer_right = 0.0
             self.steer = 0.0
 
         # Clamp values
