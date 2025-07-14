@@ -9,15 +9,15 @@ class Publisher(Node):
         self.publisher_ = self.create_publisher(Twist, 'etruck', 10)
 
         # Motor speed variables
-        self.motor_forward = 0.0
-        self.motor_backward = 0.0
+        self.motor_forward = 0.5
+        self.motor_backward = 0.5
         self.motor_step_forward = 0.1
         self.motor_step_backward = -0.1
         self.motor = 0.0
 
         # Steering variables
-        self.steer_left = 0.0
-        self.steer_right = 0.0
+        self.steer_left = 0.5
+        self.steer_right = 0.5
         self.steer_step_left = 0.1
         self.steer_step_right = 0.1
         self.steer = 0.0
@@ -44,14 +44,14 @@ class Publisher(Node):
         elif key == 'f':
             self.motor_forward += self.motor_step_forward
             self.motor = self.motor_forward
-            self.motor_backward = 0.0
+            self.motor_backward = 0.5
         elif key == 'b':
             self.motor_backward += self.motor_step_backward
             self.motor = self.motor_backward
-            self.motor_forward = 0.0
+            self.motor_forward = 0.5
         elif key == 's':
-            self.motor_forward = 0.0
-            self.motor_backward = 0.0
+            self.motor_forward = 0.5
+            self.motor_backward = 0.5
             self.motor = 0.0
 
         # Steering control
@@ -62,8 +62,8 @@ class Publisher(Node):
             self.steer_right += self.steer_step_right
             self.steer = self.steer_right
         elif key == 'c':
-            self.steer_left = 0.0
-            self.steer_right = 0.0
+            self.steer_left = 0.5
+            self.steer_right = 0.5
             self.steer = 0.0
 
         # Clamp values
