@@ -6,11 +6,24 @@ Servo steer;    // Servo for steering
 const int escPin = A0;
 const int steerPin = A3;
 
+void armESC() {
+  esc.write(90);    // Neutral signal
+  delay(2000);      // Wait 2 seconds
+
+  esc.write(135);   // Full throttle (or max allowed by your ESC)
+  delay(1000);
+
+  esc.write(90);    // Back to neutral
+  delay(1000);
+}
+
 void setup() {
   Serial.begin(9600);
   esc.attach(escPin);
   steer.attach(steerPin);
-  delay(2000);    // Wait 2 seconds for ESC to initialize
+  
+  armESC();
+  
   stopMotor();
   centerSteer();
 }
