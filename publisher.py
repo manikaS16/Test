@@ -1,38 +1,46 @@
 #!/usr/bin/env python3
-import rospy
+import rclpy
+from rclpy.node import Node
 from geometry_msgs.msg import Twist
-import keyboard
 
-def clamp(val, min_val, max_val):
-    return max(min_val, min(max_val, val))
+class Publisher(Node):
+    def __init__(self):
+        super().__init__('publisher')
+        self.publisher_ = self.create_publisher(Twist, 'etruck', 10)
+        self.speed = 0.0
+        self.step = 0.1
 
-def main():
-    rospy.init_node('etruck_publisher')
-    pub = rospy.Publisher('/etruck', Twist, queue_size=10)
-    rate = rospy.Rate(10)  # 10 Hz
+        self.get_logger().info("Press keys in terminal to control:")
+        self.get_logger().info("'f' = forward, 'b' = backward, 's' = stop, 'q' = quit")
 
-    speed = 0.0
-    step = 0.1  # Increment per key press
+        self.timer = self.create_timer(0.5, self.timer_callback)
 
-    print("Controls: 'f'=faster forward | 'b'=faster backward | 's'=stop | 'q'=quit")
+    def timer_callback(self):
+        key = input("Enter command (f/b/s/q): ").strip()
+        if key == 'q':
+            self.get_logger().info('Quitting...')
+            rclpy.shutdown()
+            return
+        elif key == 'f':
+            self.speed += self.step
+        elif key == 'b':
+            self.speed -= self.step
+        elif key == 's':
+            self.speed = 0.0
 
-    while not rospy.is_shutdown():
-        if keyboard.is_pressed('q'):
-            break
-        elif keyboard.is_pressed('f'):
-            speed += step
-        elif keyboard.is_pressed('b'):
-            speed -= step
-        elif keyboard.is_pressed('s'):
-            speed = 0.0
-
-        speed = clamp(speed, -1.0, 1.0)
+        self.speed = max(-1.0, min(1.0, self.speed))
 
         msg = Twist()
-        msg.linear.x = speed
-        pub.publish(msg)
-        rospy.loginfo(f"[Publisher] Speed set to: {speed:.2f}")
-        rate.sleep()
+        msg.linear.x = self.speed
+        self.publisher_.publish(msg)
+        self.get_logger().info(f"Published speed: {self.speed:.2f}")
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = Publisher()
+    rclpy.spin(node)
+    node.destroy_node()
+    rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
