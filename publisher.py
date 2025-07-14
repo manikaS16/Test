@@ -9,17 +9,18 @@ class Publisher(Node):
         self.publisher_ = self.create_publisher(Twist, 'etruck', 10)
 
         # Motor speed variables
-        self.speed_forward = 0.0
-        self.speed_backward = 0.0
-        self.step_forward = 0.1
-        self.step_backward = -0.1
-        self.speed = 0.0
+        self.motor_forward = 0.0
+        self.motor_backward = 0.0
+        self.motor_step_forward = 0.1
+        self.motor_step_backward = -0.1
+        self.motor = 0.0
 
         # Steering variables
         self.steer_left = 0.0
         self.steer_right = 0.0
-        self.steer_step = 0.1
-        self.steering = 0.0  # angular.z
+        self.steer_step_left = 0.1
+        self.steer_step_right = 0.1
+        self.steer = 0.0
 
         self.get_logger().info("Controls:")
         self.get_logger().info("'f' = faster forward")
@@ -41,37 +42,39 @@ class Publisher(Node):
             rclpy.shutdown()
             return
         elif key == 'f':
-            self.speed_forward += self.step_forward
-            self.speed = self.speed_forward
-            self.speed_backward = 0.0  # reset backward when going forward
+            self.motor_forward += self.motor_step_forward
+            self.motor = self.motor_forward
+            self.motor_backward = 0.0
         elif key == 'b':
-            self.speed_backward += self.step_backward  # note: step_backward is negative
-            self.speed = self.speed_backward
-            self.speed_forward = 0.0  # reset forward when going backward
+            self.motor_backward += self.motor_step_backward
+            self.motor = self.motor_backward
+            self.motor_forward = 0.0
         elif key == 's':
-            self.speed_forward = 0.0
-            self.speed_backward = 0.0
-            self.speed = 0.0
+            self.speed_forward_motor = 0.0
+            self.speed_backward_motor = 0.0
+            self.speed_motor = 0.0
 
         # Steering control
         elif key == 'l':
-            self.steering -= self.steer_step
+            self.steer_left -= self.steer_step_left
+            self.steer = self.steer_left
         elif key == 'r':
-            self.steering += self.steer_step
+            self.steer_right += self.steer_step_right
+            self.steer = self.steer_right
         elif key == 'c':
-            self.steering = 0.0
+            self.steer = 0.0
 
         # Clamp values
-        self.speed = max(-1.0, min(1.0, self.speed))
-        self.steering = max(-1.0, min(1.0, self.steering))
+        self.motor = max(-1.0, min(1.0, self.motor))
+        self.steer = max(-1.0, min(1.0, self.steer))
 
         # Publish message
         msg = Twist()
-        msg.linear.x = self.speed
-        msg.angular.z = self.steering
+        msg.linear.x = self.motor
+        msg.angular.z = self.steer
         self.publisher_.publish(msg)
 
-        self.get_logger().info(f"Speed: {self.speed:.2f}, Steering: {self.steering:.2f}")
+        self.get_logger().info(f"Speed: {self.motor:.2f}, Steering: {self.steer:.2f}")
 
 def main(args=None):
     rclpy.init(args=args)
