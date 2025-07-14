@@ -4,9 +4,9 @@ from rclpy.node import Node
 from geometry_msgs.msg import Twist
 import serial
 
-class SimpleSubscriber(Node):
+class Subscriber(Node):
     def __init__(self):
-        super().__init__('subscriber')
+        super().__init__('Subscriber')
         self.ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)  # Change port if needed
         self.subscription = self.create_subscription(
             Twist,
@@ -24,8 +24,8 @@ class SimpleSubscriber(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    subscriber = Subscriber()
-    rclpy.spin(subscriber)
+    node = Subscriber()
+    rclpy.spin(node)
     subscriber.destroy_node()
     rclpy.shutdown()
 
