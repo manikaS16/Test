@@ -18,19 +18,16 @@ class Subscriber(Node):
     def listener_callback(self, msg):
         # Map speed from [-1, 1] to [45, 135] degrees for motor
         speed = msg.linear.x
-        motor_angle = int(90 + speed * 45)
-        motor_angle = max(45, min(135, motor_angle))  # Limit angles to safe range
-
-        # Map steering from [-1, 1] to [45, 135] degrees for steering servo
         steer = msg.angular.z
-        steer_angle = int(90 + steer * 45)
-        steer_angle = max(45, min(135, steer_angle))
+        # Clamp values to avoid overflow
+        speed = max(-1.0, min(1.0, speed))
+        steer = max(-1.0, min(1.0, steer))
 
-        # Send motor and steer angles separated by comma
-        send_str = f"{motor_angle},{steer_angle}\n"
+        # Send raw float values to Arduino
+        send_str = f"{speed:.2f},{steer:.2f}\n"
         self.ser.write(send_str.encode())
 
-        self.get_logger().info(f"Sent motor_angle: {motor_angle}, steer_angle: {steer_angle}")
+        self.get_logger().info(f"Sent speed: {speed:.2f}, steer: {steer:.2f}")
 
 def main(args=None):
     rclpy.init(args=args)
