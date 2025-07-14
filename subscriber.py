@@ -16,16 +16,26 @@ class Subscriber(Node):
         self.get_logger().info('Subscriber started')
 
     def listener_callback(self, msg):
+        # Map speed from [-1, 1] to [45, 135] degrees for motor
         speed = msg.linear.x
-        angle = int(90 + speed * 45)
-        angle = max(0, min(180, angle))
-        self.ser.write(f"{angle}\n".encode())
-        self.get_logger().info(f"Sent angle: {angle}")
+        motor_angle = int(90 + speed * 45)
+        motor_angle = max(45, min(135, motor_angle))  # Limit angles to safe range
+
+        # Map steering from [-1, 1] to [45, 135] degrees for steering servo
+        steer = msg.angular.z
+        steer_angle = int(90 + steer * 45)
+        steer_angle = max(45, min(135, steer_angle))
+
+        # Send motor and steer angles separated by comma
+        send_str = f"{motor_angle},{steer_angle}\n"
+        self.ser.write(send_str.encode())
+
+        self.get_logger().info(f"Sent motor_angle: {motor_angle}, steer_angle: {steer_angle}")
 
 def main(args=None):
     rclpy.init(args=args)
-    node = Subscriber()
-    rclpy.spin(node)
+    subscriber = Subscriber()
+    rclpy.spin(subscriber)
     subscriber.destroy_node()
     rclpy.shutdown()
 
